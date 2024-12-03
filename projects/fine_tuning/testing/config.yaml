@@ -342,6 +342,17 @@ ci_presets:
     tests.fine_tuning.test_settings.hyper_parameters.num_samples: [20, 75, 150]
     tests.fine_tuning.test_settings.gpu: null
 
+  ray_bench_torch_cpu:
+    extends: [ray_bench]
+    tests.fine_tuning.matbenchmarking.enabled: true
+    tests.fine_tuning.matbenchmarking.stop_on_error: true
+    tests.fine_tuning.test_settings.pod_count: 4  # not sure
+    tests.fine_tuning.test_settings.hyper_parameters.num_runs: 3
+    tests.fine_tuning.test_settings.hyper_parameters.num_epochs: 20
+    tests.fine_tuning.test_settings.hyper_parameters.num_workers: 4
+    tests.fine_tuning.test_settings.hyper_parameters.cpus_per_worker: 8
+    tests.fine_tuning.test_settings.gpu: null
+
   # ---
 
   ilab:
