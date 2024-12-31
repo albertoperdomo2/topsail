@@ -16,19 +16,24 @@ if [[ $WORLD_SIZE == 1 ]]; then
     else
         echo "Running with a $NUM_GPUS GPUs"
     fi
-    time python /app/accelerate_launch.py
+    time python -m torch.distributed.run \
+        --node_rank "$RANK" \
+        --nnodes "$WORLD_SIZE" \
+        --nproc_per_node "$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader | wc -l) " \
+        --master_addr "$MASTER_ADDR" \
+        --master_port "$MASTER_PORT" \
+        launch_training.py
     exit 0
 fi
 echo "Running on $WORLD_SIZE machines with $NUM_GPUS GPUs each."
 
-time accelerate launch \
-     --debug \
-     --machine_rank $RANK \
-     --num_machines $WORLD_SIZE \
-     --num_processes $WORLD_SIZE \
-     --main_process_ip $MASTER_ADDR \
-     --main_process_port $MASTER_PORT \
-     --mixed_precision no \
-     --dynamo_backend no \
-     --multi_gpu \
+time python -m torch.distributed.run \
+     --node_rank "$RANK" \
+     --nnodes "$WORLD_SIZE" \
+     --nproc_per_node "$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader | wc -l) " \
+     --master_addr "$MASTER_ADDR" \
+     --master_port "$MASTER_PORT" \
      launch_training.py
+
+# --mixed_precision no --> disabled by default in fsdp
+# --dynamo_backend no --> torch.compile disabled by default in fsdp
