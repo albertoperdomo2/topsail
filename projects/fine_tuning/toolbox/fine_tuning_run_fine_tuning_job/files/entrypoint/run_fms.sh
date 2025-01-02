@@ -16,19 +16,24 @@ if [[ $WORLD_SIZE == 1 ]]; then
     else
         echo "Running with a $NUM_GPUS GPUs"
     fi
-    export LOG_LEVEL=DEBUG
-    time python /app/accelerate_launch.py
+    python -m accelerate.commands.launch \
+     --num_processes=8 \
+     --num_machines=1 \
+     --mixed_precision=no \
+     --use_fsdp \
+     --fsdp_auto_wrap_policy="TRANSFORMER_BASED_WRAP" \
+     --fsdp_backward_prefetch="BACKWARD_PRE" \
+     --fsdp_forward_prefetch="false" \
+     --fsdp_offload_params="false" \
+     --fsdp_sharding_strategy=1 \
+     --fsdp_state_dict_type="FULL_STATE_DICT" \
+     --fsdp_cpu_ram_efficient_loading="true" \
+     --fsdp_sync_module_states="true" \
+     --rdzv_backend="static" \
+     --same_network \
+     --machine_rank=0 \
+     --dynamo_backend=no \
+     --module \
+     tuning.sft_trainer
     exit 0
 fi
-echo "Running on $WORLD_SIZE machines with $NUM_GPUS GPUs each."
-
-time python -m torch.distributed.run \
-     --node_rank "$RANK" \
-     --nnodes "$WORLD_SIZE" \
-     --nproc_per_node "$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader | wc -l) " \
-     --master_addr "$MASTER_ADDR" \
-     --master_port "$MASTER_PORT" \
-     launch_training.py
-
-# --mixed_precision no --> disabled by default in fsdp
-# --dynamo_backend no --> torch.compile disabled by default in fsdp
