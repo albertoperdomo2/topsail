@@ -21,14 +21,12 @@ if [[ $WORLD_SIZE == 1 ]]; then
      --num_machines=1 \
      --mixed_precision=no \
      --use_fsdp \
-     --fsdp_auto_wrap_policy="TRANSFORMER_BASED_WRAP" \
-     --fsdp_backward_prefetch="BACKWARD_PRE" \
-     --fsdp_forward_prefetch="false" \
+     --fsdp_auto_wrap_policy="HYBRID_SHARD" \
+     --fsdp_forward_prefetch="BACKWARD_POST" \
      --fsdp_offload_params="false" \
-     --fsdp_sharding_strategy=1 \
-     --fsdp_state_dict_type="FULL_STATE_DICT" \
-     --fsdp_cpu_ram_efficient_loading="true" \
+     --fsdp_state_dict_type="SHARDED_STATE_DICT" \
      --fsdp_sync_module_states="true" \
+     --fsdp_use_orig_params="false" \
      --rdzv_backend="static" \
      --same_network \
      --machine_rank=0 \
