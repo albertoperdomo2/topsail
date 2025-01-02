@@ -16,13 +16,8 @@ if [[ $WORLD_SIZE == 1 ]]; then
     else
         echo "Running with a $NUM_GPUS GPUs"
     fi
-    time python -m torch.distributed.run \
-        --node_rank "$RANK" \
-        --nnodes "$WORLD_SIZE" \
-        --nproc_per_node "$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader | wc -l) " \
-        --master_addr "$MASTER_ADDR" \
-        --master_port "$MASTER_PORT" \
-        launch_training.py
+    export LOG_LEVEL=DEBUG
+    time python /app/accelerate_launch.py
     exit 0
 fi
 echo "Running on $WORLD_SIZE machines with $NUM_GPUS GPUs each."
